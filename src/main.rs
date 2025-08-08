@@ -1,3 +1,6 @@
+mod disassemble;
+
+use crate::disassemble::disassemble_code;
 use clap::{Arg, ArgMatches, Command, crate_version};
 use std::{io::BufReader, path::Path};
 use yansi::Paint;
@@ -23,25 +26,11 @@ fn main() {
                 .value_parser(validate_python_version),
         )
         .arg(
-            Arg::new("disable-coloring")
-                .short('d')
-                .long("disable-coloring")
+            Arg::new("no-colors")
+                .short('n')
+                .long("no-colors")
                 .action(clap::ArgAction::SetTrue)
                 .help("Disable coloring"),
-        )
-        .arg(
-            Arg::new("show-constants")
-                .short('c')
-                .long("show-constants")
-                .action(clap::ArgAction::SetTrue)
-                .help("Show constants table"),
-        )
-        .arg(
-            Arg::new("show-names")
-                .short('n')
-                .long("show-names")
-                .action(clap::ArgAction::SetTrue)
-                .help("Show names table"),
         )
         .get_matches();
 
@@ -62,7 +51,7 @@ fn main() {
 
     let python_version = matches.get_one::<python_marshal::magic::PyVersion>("python-version");
 
-    let pyc_file = match python_version {
+    let code_object = match python_version {
         Some(version) => pyc_editor::load_code(reader, *version),
         None => pyc_editor::load_pyc(reader).map(|pyc| match pyc {
             pyc_editor::PycFile::V310(pyc_file) => {
@@ -71,12 +60,12 @@ fn main() {
         }),
     }
     .map_err(|e| {
-        eprintln!("Failed to parse file: {}", e);
+        eprintln!("Failed to parse file: {}", e.red().bold());
         std::process::exit(1);
     })
     .unwrap();
 
-    dbg!(pyc_file);
+    print!("{}", disassemble_code(&code_object));
 }
 
 /// Validate Python version format (e.g., 3.8, 3.9, 3.10, 3.11, etc.)
@@ -100,6 +89,11 @@ fn validate_python_version(version: &str) -> Result<python_marshal::magic::PyVer
 fn validate_args(matches: &ArgMatches) -> Result<(), String> {
     let input_file = matches.get_one::<String>("input").unwrap();
     let python_version = matches.get_one::<python_marshal::magic::PyVersion>("python-version");
+    let no_colors = matches.get_one::<bool>("no-colors");
+
+    if no_colors == Some(&true) {
+        yansi::disable();
+    }
 
     if !Path::new(input_file).exists() {
         return Err(format!("Input file '{}' does not exist", input_file));
