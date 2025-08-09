@@ -1,7 +1,5 @@
-pub mod disassemble;
-mod v310;
+use core::disassemble_code;
 
-use crate::disassemble::disassemble_code;
 use clap::{Arg, ArgMatches, Command, crate_version};
 use std::{io::BufReader, path::Path};
 use yansi::Paint;

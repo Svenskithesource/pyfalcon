@@ -1,4 +1,5 @@
-use crate::v310;
+pub mod v310;
+
 use pyc_editor::CodeObject;
 
 /// Disassemble the code object, and optionally the constants
