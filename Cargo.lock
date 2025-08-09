@@ -306,9 +306,9 @@ dependencies = [
 
 [[package]]
 name = "pyc_editor"
-version = "0.2.4"
+version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72e3f0aa277d3d294f838e4a4ff3ffad9ffc8d8b09786c53e30ec9933a535eb2"
+checksum = "390f171eba141a65e8f721d95b77842d8d8a089c2f41e30f82066d9de147add3"
 dependencies = [
  "bitflags",
  "hashable",

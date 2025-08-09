@@ -1,4 +1,5 @@
-mod disassemble;
+pub mod disassemble;
+mod v310;
 
 use crate::disassemble::disassemble_code;
 use clap::{Arg, ArgMatches, Command, crate_version};
@@ -65,7 +66,7 @@ fn main() {
     })
     .unwrap();
 
-    print!("{}", disassemble_code(&code_object));
+    print!("{}", disassemble_code(&code_object, true));
 }
 
 /// Validate Python version format (e.g., 3.8, 3.9, 3.10, 3.11, etc.)
