@@ -14,12 +14,12 @@ fn main() -> eframe::Result {
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([640.0, 240.0]) // wide enough for the drag-drop overlay text
+            .with_inner_size([800.0, 400.0]) // wider for split layout
             .with_drag_and_drop(true),
         ..Default::default()
     };
     eframe::run_native(
-        "Native file dialogs and drag-and-drop files",
+        "PyFalcon - PYC and Marshal File Processor",
         options,
         Box::new(|_cc| Ok(Box::<MyApp>::default())),
     )
@@ -71,51 +71,117 @@ fn main() {
     });
 }
 
-#[derive(Default)]
 struct MyApp {
-    dropped_files: Vec<egui::DroppedFile>,
+    pyc_file: Option<egui::DroppedFile>,
+    marshal_file: Option<egui::DroppedFile>,
+    selected_python_version: String,
+    python_versions: Vec<String>,
+}
+
+impl Default for MyApp {
+    fn default() -> Self {
+        Self {
+            pyc_file: None,
+            marshal_file: None,
+            selected_python_version: "3.11".to_string(),
+            python_versions: vec![
+                "2.7".to_string(),
+                "3.6".to_string(),
+                "3.7".to_string(),
+                "3.8".to_string(),
+                "3.9".to_string(),
+                "3.10".to_string(),
+                "3.11".to_string(),
+                "3.12".to_string(),
+                "3.13".to_string(),
+            ],
+        }
+    }
 }
 
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        egui::CentralPanel::default().show(ctx, |ui| {
-            ui.label("Drag-and-drop files onto the window!");
+        egui::SidePanel::left("pyc_panel")
+            .resizable(false)
+            .exact_width(ctx.available_rect().width() / 2.0)
+            .show(ctx, |ui| {
+                ui.vertical(|ui| {
+                    ui.heading("PYC File");
+                    ui.separator();
 
-            // Show dropped files (if any):
-            if !self.dropped_files.is_empty() {
-                ui.group(|ui| {
-                    ui.label("Dropped files:");
-
-                    for file in &self.dropped_files {
-                        let mut info = if let Some(path) = &file.path {
-                            path.display().to_string()
-                        } else if !file.name.is_empty() {
-                            file.name.clone()
-                        } else {
-                            "???".to_owned()
-                        };
-
-                        let mut additional_info = vec![];
-                        if !file.mime.is_empty() {
-                            additional_info.push(format!("type: {}", file.mime));
-                        }
-                        if let Some(bytes) = &file.bytes {
-                            additional_info.push(format!("{} bytes", bytes.len()));
-                        }
-                        if !additional_info.is_empty() {
-                            info += &format!(" ({})", additional_info.join(", "));
-                        }
-
-                        ui.label(info);
-                    }
+                    ui.centered_and_justified(|ui| {
+                        ui.label("Drop .pyc file here");
+                    });
                 });
-            }
-        });
+            });
 
-        // Collect dropped files:
+        egui::SidePanel::right("marshal_panel")
+            .resizable(false)
+            .exact_width(ctx.available_rect().width())
+            .show(ctx, |ui| {
+                // Right side - Marshal file drop zone with Python version selector
+                ui.with_layout(
+                    egui::Layout::top_down_justified(egui::Align::Center),
+                    |ui| {
+                        ui.heading("Marshal File");
+                        ui.separator();
+
+                        // Python version dropdown
+                        ui.vertical(|ui| {
+                            ui.horizontal(|ui| {
+                                ui.label("Python Version:");
+                                egui::ComboBox::from_label("")
+                                    .selected_text(&self.selected_python_version)
+                                    .show_ui(ui, |ui| {
+                                        for version in &self.python_versions {
+                                            ui.selectable_value(
+                                                &mut self.selected_python_version,
+                                                version.clone(),
+                                                version,
+                                            );
+                                        }
+                                    });
+                            });
+                        });
+
+                        ui.add_space(10.0);
+
+                        ui.centered_and_justified(|ui| {
+                            ui.vertical(|ui| {
+                                ui.label("Drop marshal file here");
+                                ui.label(format!("(for Python {})", self.selected_python_version));
+                            });
+                        });
+                    },
+                );
+            });
+
+        // Handle dropped files
         ctx.input(|i| {
             if !i.raw.dropped_files.is_empty() {
-                self.dropped_files.clone_from(&i.raw.dropped_files);
+                for file in &i.raw.dropped_files {
+                    // Determine which side to drop the file based on file extension or position
+                    if let Some(path) = &file.path {
+                        let extension = path
+                            .extension()
+                            .and_then(|ext| ext.to_str())
+                            .unwrap_or("")
+                            .to_lowercase();
+
+                        match extension.as_str() {
+                            "pyc" => {
+                                self.pyc_file = Some(file.clone());
+                            }
+                            _ => {
+                                // Assume it's a marshal file if not .pyc
+                                self.marshal_file = Some(file.clone());
+                            }
+                        }
+                    } else {
+                        // If no path, assume marshal file
+                        self.marshal_file = Some(file.clone());
+                    }
+                }
             }
         });
     }
