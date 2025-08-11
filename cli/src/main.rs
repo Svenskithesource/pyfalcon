@@ -8,7 +8,7 @@ fn main() {
     let matches = Command::new("pyfalcon")
         .version(crate_version!())
         .author("svenskithesource")
-        .about("A Python bytecode disassembler")
+        .about("A cross-version Python disassembler")
         .arg(
             Arg::new("input")
                 .help("Input file to disassemble")
