@@ -1,13 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 #![allow(rustdoc::missing_crate_level_docs)] // it's an example
 
-use std::{
-    path::PathBuf,
-    sync::{Arc, Mutex},
-};
-
 use eframe::egui;
-use egui::DroppedFile;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> eframe::Result {
@@ -71,18 +65,10 @@ fn main() {
     });
 }
 
+#[derive(Default)]
 struct PyFalcon {
     pyc_file: Option<Vec<u8>>,
     disassembled_text: Option<String>,
-}
-
-impl Default for PyFalcon {
-    fn default() -> Self {
-        Self {
-            pyc_file: None,
-            disassembled_text: None,
-        }
-    }
 }
 
 impl eframe::App for PyFalcon {
