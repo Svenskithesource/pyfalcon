@@ -12,6 +12,10 @@ fn main() -> eframe::Result {
             .with_drag_and_drop(true),
         ..Default::default()
     };
+
+    // ansi colors don't work in egui
+    core::disable_colors();
+
     eframe::run_native(
         "PyFalcon - PYC and Marshal File Processor",
         options,
@@ -40,11 +44,14 @@ fn main() {
             .dyn_into::<web_sys::HtmlCanvasElement>()
             .expect("the_canvas_id was not a HtmlCanvasElement");
 
+        // ansi colors don't work in egui
+        core::disable_colors();
+
         let start_result = eframe::WebRunner::new()
             .start(
                 canvas,
                 web_options,
-                Box::new(|cc| Ok(Box::<PyFalcon>::default())),
+                Box::new(|_| Ok(Box::<PyFalcon>::default())),
             )
             .await;
 
@@ -127,7 +134,6 @@ impl eframe::App for PyFalcon {
                         Ok(code_object) => {
                             let mut text = match &self.disassembled_text {
                                 None => {
-                                    core::disable_colors();
                                     let text = core::disassemble_code(&code_object, true);
                                     self.disassembled_text = Some(text.clone());
                                     text
