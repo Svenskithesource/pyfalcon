@@ -1,7 +1,16 @@
 [package]
 name = "pyfalcon"
 version = "0.1.0"
+license = "GPL-3.0-or-later"
+description = "A cross-version Python disassembler that supports both command-line and web"
+homepage = "https://pyfalcon.svenskithesource.be"
+repository = "https://github.com/Svenskithesource/pyfalcon"
+readme = "README.md"
 edition = "2024"
+
+[[bin]]
+name = "pyfalcon"
+path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4.5.43", features = ["cargo"] }
