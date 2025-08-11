@@ -28,6 +28,8 @@ cargo run --bin pyfalcon -- input.pyc
 
 ## Building
 
+To build the web version you will need to install trunk (`cargo install trunk`).
+
 ```bash
 # CLI tool
 cargo build --release --bin pyfalcon
