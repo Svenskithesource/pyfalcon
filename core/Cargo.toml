@@ -2,11 +2,8 @@
 name = "pyfalcon-core"
 version = "0.1.0"
 edition = "2024"
-publish = false
 
 [dependencies]
 pyc_editor = "0.2.0"
 python_marshal = "0.4.2"
 yansi = "1.0.1"
-
-[lib]
