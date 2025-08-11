@@ -2354,7 +2354,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "pyc_editor",
- "pyfalcon-core",
+ "pyfalcon-core 0.1.0 (git+https://github.com/Svenskithesource/pyfalcon)",
  "python_marshal",
  "yansi",
 ]
@@ -2362,6 +2362,16 @@ dependencies = [
 [[package]]
 name = "pyfalcon-core"
 version = "0.1.0"
+dependencies = [
+ "pyc_editor",
+ "python_marshal",
+ "yansi",
+]
+
+[[package]]
+name = "pyfalcon-core"
+version = "0.1.0"
+source = "git+https://github.com/Svenskithesource/pyfalcon#981cd4fd5b9c7c66478767ed1c66804330116607"
 dependencies = [
  "pyc_editor",
  "python_marshal",
@@ -2377,7 +2387,7 @@ dependencies = [
  "env_logger",
  "log",
  "pyc_editor",
- "pyfalcon-core",
+ "pyfalcon-core 0.1.0",
  "rfd",
  "wasm-bindgen-futures",
  "web-sys",
