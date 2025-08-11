@@ -21,7 +21,7 @@ fn main() -> eframe::Result {
     eframe::run_native(
         "PyFalcon - PYC and Marshal File Processor",
         options,
-        Box::new(|_cc| Ok(Box::<MyApp>::default())),
+        Box::new(|_cc| Ok(Box::<PyFalcon>::default())),
     )
 }
 
@@ -50,7 +50,7 @@ fn main() {
             .start(
                 canvas,
                 web_options,
-                Box::new(|cc| Ok(Box::<MyApp>::default())),
+                Box::new(|cc| Ok(Box::<PyFalcon>::default())),
             )
             .await;
 
@@ -71,118 +71,105 @@ fn main() {
     });
 }
 
-struct MyApp {
-    pyc_file: Option<egui::DroppedFile>,
-    marshal_file: Option<egui::DroppedFile>,
-    selected_python_version: String,
-    python_versions: Vec<String>,
+struct PyFalcon {
+    pyc_file: Option<Vec<u8>>,
+    disassembled_text: Option<String>,
 }
 
-impl Default for MyApp {
+impl Default for PyFalcon {
     fn default() -> Self {
         Self {
             pyc_file: None,
-            marshal_file: None,
-            selected_python_version: "3.11".to_string(),
-            python_versions: vec![
-                "2.7".to_string(),
-                "3.6".to_string(),
-                "3.7".to_string(),
-                "3.8".to_string(),
-                "3.9".to_string(),
-                "3.10".to_string(),
-                "3.11".to_string(),
-                "3.12".to_string(),
-                "3.13".to_string(),
-            ],
+            disassembled_text: None,
         }
     }
 }
 
-impl eframe::App for MyApp {
+impl eframe::App for PyFalcon {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        egui::SidePanel::left("pyc_panel")
-            .resizable(false)
-            .exact_width(ctx.available_rect().width() / 2.0)
-            .show(ctx, |ui| {
-                ui.vertical(|ui| {
-                    ui.heading("PYC File");
-                    ui.separator();
-
-                    ui.centered_and_justified(|ui| {
-                        ui.label("Drop .pyc file here");
-                    });
-                });
-            });
-
-        egui::SidePanel::right("marshal_panel")
-            .resizable(false)
-            .exact_width(ctx.available_rect().width())
-            .show(ctx, |ui| {
-                // Right side - Marshal file drop zone with Python version selector
-                ui.with_layout(
-                    egui::Layout::top_down_justified(egui::Align::Center),
-                    |ui| {
-                        ui.heading("Marshal File");
+        match &self.pyc_file {
+            None => {
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    ui.vertical(|ui| {
+                        ui.heading("pyfalcon");
                         ui.separator();
 
-                        // Python version dropdown
-                        ui.vertical(|ui| {
-                            ui.horizontal(|ui| {
-                                ui.label("Python Version:");
-                                egui::ComboBox::from_label("")
-                                    .selected_text(&self.selected_python_version)
-                                    .show_ui(ui, |ui| {
-                                        for version in &self.python_versions {
-                                            ui.selectable_value(
-                                                &mut self.selected_python_version,
-                                                version.clone(),
-                                                version,
-                                            );
-                                        }
-                                    });
-                            });
-                        });
-
-                        ui.add_space(10.0);
-
                         ui.centered_and_justified(|ui| {
-                            ui.vertical(|ui| {
-                                ui.label("Drop marshal file here");
-                                ui.label(format!("(for Python {})", self.selected_python_version));
-                            });
+                            ui.label("Drop .pyc file here");
                         });
-                    },
-                );
-            });
+                    });
+                });
 
-        // Handle dropped files
-        ctx.input(|i| {
-            if !i.raw.dropped_files.is_empty() {
-                for file in &i.raw.dropped_files {
-                    // Determine which side to drop the file based on file extension or position
-                    if let Some(path) = &file.path {
-                        let extension = path
-                            .extension()
-                            .and_then(|ext| ext.to_str())
-                            .unwrap_or("")
-                            .to_lowercase();
-
-                        match extension.as_str() {
-                            "pyc" => {
-                                self.pyc_file = Some(file.clone());
-                            }
-                            _ => {
-                                // Assume it's a marshal file if not .pyc
-                                self.marshal_file = Some(file.clone());
+                // Handle dropped files
+                ctx.input(|i| {
+                    if !i.raw.dropped_files.is_empty() {
+                        for file in &i.raw.dropped_files {
+                            match &file.bytes {
+                                None => {
+                                    continue; // Can't read file
+                                }
+                                Some(contents) => {
+                                    self.pyc_file = Some(contents.to_vec());
+                                    self.disassembled_text = None;
+                                    break; // Pick first file
+                                }
                             }
                         }
-                    } else {
-                        // If no path, assume marshal file
-                        self.marshal_file = Some(file.clone());
                     }
-                }
+                });
             }
-        });
+            Some(data) => {
+                let data = data.clone();
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.heading("pyfalcon");
+                        if ui.button("Close file").clicked() {
+                            self.pyc_file = None;
+                        }
+                    });
+
+                    ui.separator();
+
+                    let code_object = pyc_editor::load_pyc(std::io::Cursor::new(data.to_vec()))
+                        .map(|pyc| match pyc {
+                            pyc_editor::PycFile::V310(pyc_file) => {
+                                pyc_editor::CodeObject::V310(pyc_file.code_object)
+                            }
+                        });
+
+                    match code_object {
+                        Ok(code_object) => {
+                            let mut text = match &self.disassembled_text {
+                                None => {
+                                    core::disable_colors();
+                                    let text = core::disassemble_code(&code_object, true);
+                                    self.disassembled_text = Some(text.clone());
+                                    text
+                                }
+                                Some(text) => text.to_string(),
+                            };
+
+                            egui::ScrollArea::vertical()
+                                .auto_shrink([false; 2])
+                                .show(ui, |ui| {
+                                    ui.add(
+                                        egui::TextEdit::multiline(&mut text)
+                                            .font(egui::TextStyle::Monospace)
+                                            .code_editor()
+                                            .desired_rows(20)
+                                            .desired_width(f32::INFINITY),
+                                    );
+                                });
+                        }
+                        Err(e) => {
+                            ui.colored_label(
+                                egui::Color32::RED,
+                                format!("Failed to load file: {e}"),
+                            );
+                        }
+                    }
+                });
+            }
+        }
     }
 }

@@ -2376,6 +2376,8 @@ dependencies = [
  "egui",
  "env_logger",
  "log",
+ "pyc_editor",
+ "pyfalcon-core",
  "rfd",
  "wasm-bindgen-futures",
  "web-sys",

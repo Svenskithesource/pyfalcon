@@ -8,3 +8,7 @@ pub fn disassemble_code(code: &CodeObject, constants: bool) -> String {
         CodeObject::V310(code) => v310::disassemble::disassemble_code(code, constants),
     }
 }
+
+pub fn disable_colors() {
+    yansi::disable();
+}
