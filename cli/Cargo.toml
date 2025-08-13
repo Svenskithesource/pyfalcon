@@ -14,7 +14,7 @@ path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4.5.43", features = ["cargo"] }
-pyc_editor = "0.2.0"
-python_marshal = "0.4.2"
-yansi = "1.0.1"
+pyc_editor = { workspace = true }
+python_marshal = { workspace = true }
+yansi = { workspace = true }
 core = { git = "https://github.com/Svenskithesource/pyfalcon", package = "pyfalcon-core", version = "0.1.0"}

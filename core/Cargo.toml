@@ -7,6 +7,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-pyc_editor = "0.2.0"
-python_marshal = "0.4.2"
-yansi = "1.0.1"
+pyc_editor = { workspace = true }
+python_marshal = { workspace = true }
+yansi = { workspace = true }

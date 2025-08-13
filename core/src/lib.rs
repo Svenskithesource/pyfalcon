@@ -1,4 +1,5 @@
 pub mod v310;
+pub mod v311;
 
 use pyc_editor::CodeObject;
 
@@ -6,6 +7,7 @@ use pyc_editor::CodeObject;
 pub fn disassemble_code(code: &CodeObject, constants: bool) -> String {
     match code {
         CodeObject::V310(code) => v310::disassemble::disassemble_code(code, constants),
+        CodeObject::V311(code) => v311::disassemble::disassemble_code(code, constants),
     }
 }
 

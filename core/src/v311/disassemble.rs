@@ -1,6 +1,7 @@
 use pyc_editor::prelude::*;
-use pyc_editor::v310::{
-    code_objects::{ClosureRef, Code, Constant},
+use pyc_editor::v311::code_objects::JumpDirection;
+use pyc_editor::v311::{
+    code_objects::{Code, Constant},
     ext_instructions::ExtInstruction,
     instructions::{Instruction, starts_line_number},
 };
@@ -33,117 +34,196 @@ pub fn get_instruction_arg_repr(
     instruction: ExtInstruction,
 ) -> Option<String> {
     match instruction {
-        ExtInstruction::PopTop(_)
-        | ExtInstruction::RotTwo(_)
-        | ExtInstruction::RotThree(_)
-        | ExtInstruction::DupTop(_)
-        | ExtInstruction::DupTopTwo(_)
-        | ExtInstruction::RotFour(_)
+        ExtInstruction::Cache(_)
+        | ExtInstruction::PopTop(_)
+        | ExtInstruction::PushNull(_)
         | ExtInstruction::Nop(_)
         | ExtInstruction::UnaryPositive(_)
         | ExtInstruction::UnaryNegative(_)
         | ExtInstruction::UnaryNot(_)
         | ExtInstruction::UnaryInvert(_)
-        | ExtInstruction::BinaryMatrixMultiply(_)
-        | ExtInstruction::InplaceMatrixMultiply(_)
-        | ExtInstruction::BinaryPower(_)
-        | ExtInstruction::BinaryMultiply(_)
-        | ExtInstruction::BinaryModulo(_)
-        | ExtInstruction::BinaryAdd(_)
-        | ExtInstruction::BinarySubtract(_)
         | ExtInstruction::BinarySubscr(_)
-        | ExtInstruction::BinaryFloorDivide(_)
-        | ExtInstruction::BinaryTrueDivide(_)
-        | ExtInstruction::InplaceFloorDivide(_)
-        | ExtInstruction::InplaceTrueDivide(_)
         | ExtInstruction::GetLen(_)
         | ExtInstruction::MatchMapping(_)
         | ExtInstruction::MatchSequence(_)
         | ExtInstruction::MatchKeys(_)
-        | ExtInstruction::CopyDictWithoutKeys(_)
+        | ExtInstruction::PushExcInfo(_)
+        | ExtInstruction::CheckExcMatch(_)
+        | ExtInstruction::CheckEgMatch(_)
         | ExtInstruction::WithExceptStart(_)
         | ExtInstruction::GetAiter(_)
         | ExtInstruction::GetAnext(_)
         | ExtInstruction::BeforeAsyncWith(_)
+        | ExtInstruction::BeforeWith(_)
         | ExtInstruction::EndAsyncFor(_)
-        | ExtInstruction::InplaceAdd(_)
-        | ExtInstruction::InplaceSubtract(_)
-        | ExtInstruction::InplaceMultiply(_)
-        | ExtInstruction::InplaceModulo(_)
         | ExtInstruction::StoreSubscr(_)
         | ExtInstruction::DeleteSubscr(_)
-        | ExtInstruction::BinaryLshift(_)
-        | ExtInstruction::BinaryRshift(_)
-        | ExtInstruction::BinaryAnd(_)
-        | ExtInstruction::BinaryXor(_)
-        | ExtInstruction::BinaryOr(_)
-        | ExtInstruction::InplacePower(_)
         | ExtInstruction::GetIter(_)
         | ExtInstruction::GetYieldFromIter(_)
         | ExtInstruction::PrintExpr(_)
         | ExtInstruction::LoadBuildClass(_)
-        | ExtInstruction::YieldFrom(_)
-        | ExtInstruction::GetAwaitable(_)
         | ExtInstruction::LoadAssertionError(_)
-        | ExtInstruction::InplaceLshift(_)
-        | ExtInstruction::InplaceRshift(_)
-        | ExtInstruction::InplaceAnd(_)
-        | ExtInstruction::InplaceXor(_)
-        | ExtInstruction::InplaceOr(_)
+        | ExtInstruction::ReturnGenerator(_)
         | ExtInstruction::ListToTuple(_)
         | ExtInstruction::ReturnValue(_)
         | ExtInstruction::ImportStar(_)
         | ExtInstruction::SetupAnnotations(_)
         | ExtInstruction::YieldValue(_)
-        | ExtInstruction::PopBlock(_)
-        | ExtInstruction::PopExcept(_)
-        | ExtInstruction::InvalidOpcode(_) => None,
+        | ExtInstruction::AsyncGenWrap(_)
+        | ExtInstruction::PrepReraiseStar(_)
+        | ExtInstruction::PopExcept(_) => None,
         ExtInstruction::StoreName(name_index)
         | ExtInstruction::DeleteName(name_index)
+        | ExtInstruction::LoadName(name_index)
+        | ExtInstruction::ImportName(name_index)
+        | ExtInstruction::ImportFrom(name_index)
         | ExtInstruction::StoreAttr(name_index)
         | ExtInstruction::DeleteAttr(name_index)
         | ExtInstruction::StoreGlobal(name_index)
         | ExtInstruction::DeleteGlobal(name_index)
-        | ExtInstruction::LoadName(name_index)
         | ExtInstruction::LoadAttr(name_index)
-        | ExtInstruction::ImportName(name_index)
-        | ExtInstruction::ImportFrom(name_index)
-        | ExtInstruction::LoadGlobal(name_index)
         | ExtInstruction::LoadMethod(name_index) => Some(lookup_name!(
             code.names,
             name_index.index as usize,
             |name| name.value
         )),
+        ExtInstruction::LoadGlobal(global_name_index) => {
+            let repr = lookup_name!(code.names, global_name_index.index >> 1 as usize, |name| {
+                name.value.clone()
+            });
+
+            let repr = if (global_name_index.index & 1) != 0
+                && code
+                    .names
+                    .get(global_name_index.index as usize >> 1)
+                    .is_some()
+            {
+                "NULL".to_string() + &repr
+            } else {
+                repr
+            };
+
+            Some(repr)
+        }
         ExtInstruction::UnpackSequence(_)
         | ExtInstruction::UnpackEx(_)
-        | ExtInstruction::RotN(_)
+        | ExtInstruction::Swap(_)
         | ExtInstruction::BuildTuple(_)
         | ExtInstruction::BuildList(_)
         | ExtInstruction::BuildSet(_)
         | ExtInstruction::BuildMap(_)
-        | ExtInstruction::CallFunction(_)
-        | ExtInstruction::BuildSlice(_)
-        | ExtInstruction::CallFunctionKW(_)
+        | ExtInstruction::Copy(_)
         | ExtInstruction::ListAppend(_)
         | ExtInstruction::SetAdd(_)
         | ExtInstruction::MapAdd(_)
+        | ExtInstruction::CopyFreeVars(_)
         | ExtInstruction::MatchClass(_)
         | ExtInstruction::BuildConstKeyMap(_)
         | ExtInstruction::BuildString(_)
-        | ExtInstruction::CallMethod(_)
         | ExtInstruction::ListExtend(_)
         | ExtInstruction::SetUpdate(_)
+        | ExtInstruction::DictMerge(_)
         | ExtInstruction::DictUpdate(_)
-        | ExtInstruction::DictMerge(_) => None,
+        | ExtInstruction::Precall(_)
+        | ExtInstruction::Call(_)
+        | ExtInstruction::BinaryOpAdaptive(_)
+        | ExtInstruction::BinaryOpAddFloat(_)
+        | ExtInstruction::BinaryOpAddInt(_)
+        | ExtInstruction::BinaryOpAddUnicode(_)
+        | ExtInstruction::BinaryOpInplaceAddUnicode(_)
+        | ExtInstruction::BinaryOpMultiplyFloat(_)
+        | ExtInstruction::BinaryOpMultiplyInt(_)
+        | ExtInstruction::BinaryOpSubtractFloat(_)
+        | ExtInstruction::BinaryOpSubtractInt(_)
+        | ExtInstruction::BinarySubscrAdaptive(_)
+        | ExtInstruction::BinarySubscrDict(_)
+        | ExtInstruction::BinarySubscrGetitem(_)
+        | ExtInstruction::BinarySubscrListInt(_)
+        | ExtInstruction::BinarySubscrTupleInt(_)
+        | ExtInstruction::CallAdaptive(_)
+        | ExtInstruction::CallPyExactArgs(_)
+        | ExtInstruction::CallPyWithDefaults(_)
+        | ExtInstruction::CompareOpAdaptive(_)
+        | ExtInstruction::CompareOpFloatJump(_)
+        | ExtInstruction::CompareOpIntJump(_)
+        | ExtInstruction::CompareOpStrJump(_)
+        | ExtInstruction::LoadAttrAdaptive(_)
+        | ExtInstruction::LoadAttrInstanceValue(_)
+        | ExtInstruction::LoadAttrModule(_)
+        | ExtInstruction::LoadAttrSlot(_)
+        | ExtInstruction::LoadAttrWithHint(_)
+        | ExtInstruction::LoadConstLoadFast(_)
+        | ExtInstruction::LoadFastLoadConst(_)
+        | ExtInstruction::LoadFastLoadFast(_)
+        | ExtInstruction::LoadGlobalAdaptive(_)
+        | ExtInstruction::LoadGlobalBuiltin(_)
+        | ExtInstruction::LoadGlobalModule(_)
+        | ExtInstruction::LoadMethodAdaptive(_)
+        | ExtInstruction::LoadMethodClass(_)
+        | ExtInstruction::LoadMethodModule(_)
+        | ExtInstruction::LoadMethodNoDict(_)
+        | ExtInstruction::LoadMethodWithDict(_)
+        | ExtInstruction::LoadMethodWithValues(_)
+        | ExtInstruction::PrecallAdaptive(_)
+        | ExtInstruction::PrecallBoundMethod(_)
+        | ExtInstruction::PrecallBuiltinClass(_)
+        | ExtInstruction::PrecallBuiltinFastWithKeywords(_)
+        | ExtInstruction::PrecallMethodDescriptorFastWithKeywords(_)
+        | ExtInstruction::PrecallNoKwBuiltinFast(_)
+        | ExtInstruction::PrecallNoKwBuiltinO(_)
+        | ExtInstruction::PrecallNoKwIsinstance(_)
+        | ExtInstruction::PrecallNoKwLen(_)
+        | ExtInstruction::PrecallNoKwListAppend(_)
+        | ExtInstruction::PrecallNoKwMethodDescriptorFast(_)
+        | ExtInstruction::PrecallNoKwMethodDescriptorNoargs(_)
+        | ExtInstruction::PrecallNoKwMethodDescriptorO(_)
+        | ExtInstruction::PrecallNoKwStr1(_)
+        | ExtInstruction::PrecallNoKwTuple1(_)
+        | ExtInstruction::PrecallNoKwType1(_)
+        | ExtInstruction::PrecallPyfunc(_)
+        | ExtInstruction::StoreAttrAdaptive(_)
+        | ExtInstruction::StoreAttrInstanceValue(_)
+        | ExtInstruction::StoreAttrSlot(_)
+        | ExtInstruction::StoreAttrWithHint(_)
+        | ExtInstruction::StoreFastLoadFast(_)
+        | ExtInstruction::StoreFastStoreFast(_)
+        | ExtInstruction::StoreSubscrAdaptive(_)
+        | ExtInstruction::StoreSubscrDict(_)
+        | ExtInstruction::StoreSubscrListInt(_)
+        | ExtInstruction::UnpackSequenceAdaptive(_)
+        | ExtInstruction::UnpackSequenceList(_)
+        | ExtInstruction::UnpackSequenceTuple(_)
+        | ExtInstruction::UnpackSequenceTwoTuple(_)
+        | ExtInstruction::DoTracing(_) => None,
+        ExtInstruction::LoadConst(const_index) | ExtInstruction::KwNames(const_index) => {
+            Some(lookup_name!(code.consts, const_index.index as usize))
+        }
+        ExtInstruction::CompareOp(cmp_op) => Some(cmp_op.to_string()),
         ExtInstruction::ForIter(jump)
         | ExtInstruction::JumpForward(jump)
-        | ExtInstruction::SetupFinally(jump)
-        | ExtInstruction::SetupWith(jump)
-        | ExtInstruction::SetupAsyncWith(jump) => {
-            let num = format!("{}", (index + jump.index + 1) * 2);
+        | ExtInstruction::JumpIfFalseOrPop(jump)
+        | ExtInstruction::JumpIfTrueOrPop(jump)
+        | ExtInstruction::PopJumpForwardIfFalse(jump)
+        | ExtInstruction::PopJumpForwardIfTrue(jump)
+        | ExtInstruction::Send(jump)
+        | ExtInstruction::PopJumpForwardIfNotNone(jump)
+        | ExtInstruction::PopJumpForwardIfNone(jump)
+        | ExtInstruction::JumpBackwardNoInterrupt(jump)
+        | ExtInstruction::JumpBackward(jump)
+        | ExtInstruction::JumpBackwardQuick(jump)
+        | ExtInstruction::PopJumpBackwardIfNotNone(jump)
+        | ExtInstruction::PopJumpBackwardIfNone(jump)
+        | ExtInstruction::PopJumpBackwardIfFalse(jump)
+        | ExtInstruction::PopJumpBackwardIfTrue(jump) => {
+            let jump_target = match jump.direction {
+                JumpDirection::Forward => index + jump.index + 1,
+                JumpDirection::Backward => index - jump.index - 1,
+            };
+
+            let num = format!("{}", jump_target * 2);
             Some(format!(
                 "to {}",
-                if index + jump.index + 1 < code.code.len() as u32 {
+                if jump_target < code.code.len() as u32 {
                     num
                 } else {
                     // Put on red background if it's an invalid jump target
@@ -151,59 +231,34 @@ pub fn get_instruction_arg_repr(
                 }
             ))
         }
-        ExtInstruction::LoadConst(const_index) => {
-            Some(lookup_name!(code.consts, const_index.index as usize))
-        }
-        ExtInstruction::CompareOp(comp_op) => Some(comp_op.to_string()),
-        ExtInstruction::JumpIfFalseOrPop(jump)
-        | ExtInstruction::JumpIfTrueOrPop(jump)
-        | ExtInstruction::JumpAbsolute(jump)
-        | ExtInstruction::PopJumpIfFalse(jump)
-        | ExtInstruction::PopJumpIfTrue(jump)
-        | ExtInstruction::JumpIfNotExcMatch(jump) => {
-            Some(format!(
-                "to {}",
-                if jump.index < code.code.len() as u32 {
-                    (jump.index * 2).to_string()
-                } else {
-                    // Put on red background if it's an invalid jump target
-                    (jump.index * 2).to_string().on_red().to_string()
-                }
-            ))
-        }
-        ExtInstruction::Reraise(_) => None,
         ExtInstruction::IsOp(_) | ExtInstruction::ContainsOp(_) => None,
+        ExtInstruction::Reraise(_) => None,
+        ExtInstruction::BinaryOp(binary_op) => Some(binary_op.to_string()),
         ExtInstruction::LoadFast(varname_index)
         | ExtInstruction::StoreFast(varname_index)
         | ExtInstruction::DeleteFast(varname_index) => Some(lookup_name!(
-            code.varnames,
+            code.localsplusnames,
             varname_index.index as usize,
             |name| name.value
         )),
-        ExtInstruction::GenStart(_) => None,
         ExtInstruction::RaiseVarargs(_) => None,
+        ExtInstruction::GetAwaitable(_) => None,
         ExtInstruction::MakeFunction(flags) => Some(flags.to_string()),
-        ExtInstruction::LoadClosure(closure_ref_index)
-        | ExtInstruction::LoadDeref(closure_ref_index)
-        | ExtInstruction::StoreDeref(closure_ref_index)
-        | ExtInstruction::DeleteDeref(closure_ref_index)
-        | ExtInstruction::LoadClassderef(closure_ref_index) => {
-            let index = closure_ref_index.into_closure_ref(&code.cellvars, &code.freevars);
-
-            match index {
-                ClosureRef::Cell { index } => {
-                    Some(lookup_name!(code.cellvars, index as usize, |name| name.value))
-                }
-                ClosureRef::Free { index } => {
-                    Some(lookup_name!(code.freevars, index as usize, |name| name.value))
-                }
-                ClosureRef::Invalid(index) => {
-                    Some(format!("{}", format!("Invalid index {}", index).red()))
-                }
-            }
-        }
+        ExtInstruction::BuildSlice(_) => None,
+        ExtInstruction::MakeCell(closure_index)
+        | ExtInstruction::LoadClosure(closure_index)
+        | ExtInstruction::LoadDeref(closure_index)
+        | ExtInstruction::StoreDeref(closure_index)
+        | ExtInstruction::DeleteDeref(closure_index)
+        | ExtInstruction::LoadClassderef(closure_index) => Some(lookup_name!(
+            code.localsplusnames,
+            closure_index.index as usize,
+            |name| name.value
+        )),
         ExtInstruction::CallFunctionEx(_) => None,
+        ExtInstruction::Resume(_) | ExtInstruction::ResumeQuick(_) => None,
         ExtInstruction::FormatValue(format_flag) => Some(format_flag.to_string()),
+        ExtInstruction::InvalidOpcode((_, _)) => None,
     }
 }
 

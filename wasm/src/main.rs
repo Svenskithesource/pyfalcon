@@ -128,6 +128,9 @@ impl eframe::App for PyFalcon {
                             pyc_editor::PycFile::V310(pyc_file) => {
                                 pyc_editor::CodeObject::V310(pyc_file.code_object)
                             }
+                            pyc_editor::PycFile::V311(pyc_file) => {
+                                pyc_editor::CodeObject::V311(pyc_file.code_object)
+                            }
                         });
 
                     match code_object {
