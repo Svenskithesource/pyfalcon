@@ -2340,8 +2340,8 @@ checksum = "3eb8486b569e12e2c32ad3e204dbaba5e4b5b216e9367044f25f1dba42341773"
 
 [[package]]
 name = "pyc_editor"
-version = "0.2.12"
-source = "git+https://github.com/Svenskithesource/pyc-editor#6f50d150ec47a3385b0f32f6e0ea92eb6f2653c2"
+version = "0.3.0"
+source = "git+https://github.com/Svenskithesource/pyc-editor#65efd4de7340bc81d1f7cd543835d978be6a6f40"
 dependencies = [
  "bitflags 2.9.1",
  "hashable",
@@ -2367,7 +2367,7 @@ dependencies = [
 
 [[package]]
 name = "pyfalcon-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "pyc_editor",
  "python_marshal",

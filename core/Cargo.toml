@@ -3,7 +3,7 @@ name = "pyfalcon-core"
 license = "GPL-3.0-or-later"
 description = "The core library for disassembling Python, used by pyfalcon"
 repository = "https://github.com/Svenskithesource/pyfalcon"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [dependencies]
