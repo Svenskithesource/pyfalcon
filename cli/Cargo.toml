@@ -1,6 +1,6 @@
 [package]
 name = "pyfalcon"
-version = "0.1.0"
+version = "0.1.1"
 license = "GPL-3.0-or-later"
 description = "A cross-version Python disassembler that supports both command-line and web"
 homepage = "https://pyfalcon.svenskithesource.be"
