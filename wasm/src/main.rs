@@ -114,27 +114,39 @@ impl eframe::App for PyFalcon {
             Some(data) => {
                 let data = data.clone();
                 egui::CentralPanel::default().show(ctx, |ui| {
+                    let pyc_file = pyc_editor::load_pyc(std::io::Cursor::new(data.to_vec()));
+
                     ui.horizontal(|ui| {
                         ui.heading("pyfalcon");
-                        if ui.button("Close file").clicked() {
-                            self.pyc_file = None;
+
+                        if let Ok(pyc_file) = &pyc_file {
+                            let version = match pyc_file {
+                                pyc_editor::PycFile::V310(_) => "3.10",
+                                pyc_editor::PycFile::V311(_) => "3.11",
+                            };
+                            ui.label("Python ".to_owned() + version);
                         }
+
+                        // Add a spacer to push the close button to the right
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            if ui.button("Close file").clicked() {
+                                self.pyc_file = None;
+                            }
+                        });
                     });
 
                     ui.separator();
 
-                    let code_object = pyc_editor::load_pyc(std::io::Cursor::new(data.to_vec()))
-                        .map(|pyc| match pyc {
-                            pyc_editor::PycFile::V310(pyc_file) => {
-                                pyc_editor::CodeObject::V310(pyc_file.code_object)
-                            }
-                            pyc_editor::PycFile::V311(pyc_file) => {
-                                pyc_editor::CodeObject::V311(pyc_file.code_object)
-                            }
-                        });
-
-                    match code_object {
-                        Ok(code_object) => {
+                    match &pyc_file {
+                        Ok(pyc_file) => {
+                            let code_object = match pyc_file {
+                                pyc_editor::PycFile::V310(pyc_file) => {
+                                    pyc_editor::CodeObject::V310(pyc_file.code_object.clone())
+                                }
+                                pyc_editor::PycFile::V311(pyc_file) => {
+                                    pyc_editor::CodeObject::V311(pyc_file.code_object.clone())
+                                }
+                            };
                             let mut text = match &self.disassembled_text {
                                 None => {
                                     let text = core::disassemble_code(&code_object, true);
