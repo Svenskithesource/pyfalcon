@@ -2341,7 +2341,7 @@ checksum = "3eb8486b569e12e2c32ad3e204dbaba5e4b5b216e9367044f25f1dba42341773"
 [[package]]
 name = "pyc_editor"
 version = "0.2.12"
-source = "git+https://github.com/Svenskithesource/pyc-editor#6f50d150ec47a3385b0f32f6e0ea92eb6f2653c2"
+source = "git+https://github.com/Svenskithesource/pyc-editor#546bec8981cb9414596b152ccefc13195b0b13c1"
 dependencies = [
  "bitflags 2.9.1",
  "hashable",
