@@ -98,7 +98,7 @@ pub fn get_instruction_arg_repr(
                     .get(global_name_index.index as usize >> 1)
                     .is_some()
             {
-                "NULL".to_string() + &repr
+                "NULL + ".to_string() + &repr
             } else {
                 repr
             };
@@ -217,7 +217,7 @@ pub fn get_instruction_arg_repr(
         | ExtInstruction::PopJumpBackwardIfTrue(jump) => {
             let jump_target = match jump.direction {
                 JumpDirection::Forward => index + jump.index + 1,
-                JumpDirection::Backward => index - jump.index - 1,
+                JumpDirection::Backward => index - jump.index + 1,
             };
 
             let num = format!("{}", jump_target * 2);
@@ -301,16 +301,17 @@ fn disassemble_code_object(code_object: &Code) -> String {
             if max_lineno < 1000 {
                 LINENO_WIDTH as usize
             } else {
-                code_object.code.len().to_string().len()
+                max_lineno.to_string().len()
             }
         }
-        Err(_) => LINENO_WIDTH as usize,
+        Err(_) => 0,
     };
 
-    let offset_width = if code_object.code.len() - 1 < 10_000 {
+    let maxoffset = (code_object.code.len() - 1) * 2;
+    let offset_width = if maxoffset < 10_000 {
         OFFSET_WIDTH as usize
     } else {
-        code_object.code.len().to_string().len()
+        maxoffset.to_string().len()
     };
 
     for (index, instruction) in code_object.code.into_iter().enumerate() {
@@ -347,18 +348,11 @@ fn disassemble_code_object(code_object: &Code) -> String {
 
         fields.push(format!("{:>offset_width$}", (index * 2)));
 
-        match instruction {
-            Instruction::InvalidOpcode((opcode, _)) => fields.push(format!(
-                "{:<width$}",
-                format!("{:?} <{opcode}>", instruction.get_opcode()),
-                width = OPNAME_WIDTH as usize
-            )),
-            _ => fields.push(format!(
-                "{:<width$}",
-                format!("{:?}", instruction.get_opcode()),
-                width = OPNAME_WIDTH as usize
-            )),
-        }
+        fields.push(format!(
+            "{:<width$}",
+            format!("{:?}", instruction.get_opcode()),
+            width = OPNAME_WIDTH as usize
+        ));
 
         let arg = code_object.code.get_full_arg(index).unwrap();
 
@@ -400,38 +394,59 @@ fn disassemble_code_object(code_object: &Code) -> String {
 
 #[cfg(test)]
 mod tests {
-    use pyc_editor::v310::{
+    use pyc_editor::v311;
+    use pyc_editor::v311::{
         code_objects::{Constant, FrozenConstant},
         instructions::{Instruction, Instructions},
     };
     use python_marshal::Kind::{ShortAscii, ShortAsciiInterned};
     use python_marshal::{CodeFlags, PyString};
 
-    use crate::v310::disassemble::disassemble_code;
+    use crate::v311::disassemble::disassemble_code;
 
     #[test]
     fn test_invalid_opcode() {
-        let code_object = pyc_editor::v310::code_objects::Code {
+        // 1.
+        // 2. print("line 1")
+        // 3. a = 2
+        // 4.
+        // 5. print(f"line 4, {a=}")
+
+        let code_object = v311::code_objects::Code {
             argcount: 0,
             posonlyargcount: 0,
             kwonlyargcount: 0,
-            nlocals: 0,
-            stacksize: 3,
-            flags: CodeFlags::from_bits_truncate(CodeFlags::NOFREE.bits()),
+            stacksize: 4,
+            flags: CodeFlags::from_bits_retain(0x0),
             code: Instructions::new(vec![
+                Instruction::Resume(0),
+                Instruction::PushNull(0),
                 Instruction::LoadName(0),
                 Instruction::LoadConst(0),
-                Instruction::CallFunction(1),
+                Instruction::Precall(1),
+                Instruction::Cache(0),
+                Instruction::Call(1),
+                Instruction::Cache(0),
+                Instruction::Cache(0),
+                Instruction::Cache(0),
+                Instruction::Cache(0),
                 Instruction::PopTop(0),
                 Instruction::LoadConst(1),
                 Instruction::StoreName(1),
+                Instruction::PushNull(0),
                 Instruction::LoadName(0),
                 Instruction::LoadConst(2),
                 Instruction::LoadName(1),
                 Instruction::FormatValue(2),
-                Instruction::BuildString(2),
-                Instruction::CallFunction(1),
-                Instruction::InvalidOpcode((0, 0)),
+                Instruction::InvalidOpcode((0, 5)),
+                Instruction::Precall(1),
+                Instruction::Cache(0),
+                Instruction::Call(1),
+                Instruction::Cache(0),
+                Instruction::Cache(0),
+                Instruction::Cache(0),
+                Instruction::Cache(0),
+                Instruction::PopTop(0),
                 Instruction::LoadConst(3),
                 Instruction::ReturnValue(0),
             ]),
@@ -457,9 +472,8 @@ mod tests {
                     kind: ShortAsciiInterned,
                 },
             ],
-            varnames: vec![],
-            freevars: vec![],
-            cellvars: vec![],
+            localsplusnames: vec![],
+            localspluskinds: vec![],
             filename: PyString {
                 value: "test.py".into(),
                 kind: ShortAscii,
@@ -468,8 +482,17 @@ mod tests {
                 value: "<module>".into(),
                 kind: ShortAsciiInterned,
             },
+            qualname: PyString {
+                value: "<module>".into(),
+                kind: ShortAsciiInterned,
+            },
             firstlineno: 1,
-            linetable: vec![8, 0, 4, 1, 18, 2],
+            linetable: vec![
+                240, 3, 1, 1, 1, 224, 0, 5, 128, 5, 128, 104, 129, 15, 132, 15, 128, 15, 216, 4, 5,
+                128, 1, 224, 0, 5, 128, 5, 128, 111, 144, 17, 128, 111, 128, 111, 209, 0, 22, 212,
+                0, 22, 208, 0, 22, 208, 0, 22, 208, 0, 22,
+            ],
+            exceptiontable: vec![],
         };
 
         print!("{}", disassemble_code(&code_object, true));

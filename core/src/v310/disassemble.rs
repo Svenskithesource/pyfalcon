@@ -246,16 +246,17 @@ fn disassemble_code_object(code_object: &Code) -> String {
             if max_lineno < 1000 {
                 LINENO_WIDTH as usize
             } else {
-                code_object.code.len().to_string().len()
+                max_lineno.to_string().len()
             }
         }
         Err(_) => LINENO_WIDTH as usize,
     };
 
-    let offset_width = if code_object.code.len() - 1 < 10_000 {
+    let maxoffset = (code_object.code.len() - 1) * 2;
+    let offset_width = if maxoffset < 10_000 {
         OFFSET_WIDTH as usize
     } else {
-        code_object.code.len().to_string().len()
+        maxoffset.to_string().len()
     };
 
     for (index, instruction) in code_object.code.into_iter().enumerate() {
@@ -292,18 +293,11 @@ fn disassemble_code_object(code_object: &Code) -> String {
 
         fields.push(format!("{:>offset_width$}", (index * 2)));
 
-        match instruction {
-            Instruction::InvalidOpcode((opcode, _)) => fields.push(format!(
-                "{:<width$}",
-                format!("{:?} <{opcode}>", instruction.get_opcode()),
-                width = OPNAME_WIDTH as usize
-            )),
-            _ => fields.push(format!(
-                "{:<width$}",
-                format!("{:?}", instruction.get_opcode()),
-                width = OPNAME_WIDTH as usize
-            )),
-        }
+        fields.push(format!(
+            "{:<width$}",
+            format!("{:?}", instruction.get_opcode()),
+            width = OPNAME_WIDTH as usize
+        ));
 
         let arg = code_object.code.get_full_arg(index).unwrap();
 
@@ -349,8 +343,11 @@ mod tests {
         code_objects::{Constant, FrozenConstant},
         instructions::{Instruction, Instructions},
     };
-    use python_marshal::Kind::{ShortAscii, ShortAsciiInterned};
-    use python_marshal::{CodeFlags, PyString};
+    use python_marshal::PyString;
+    use python_marshal::{
+        CodeFlags,
+        Kind::{ShortAscii, ShortAsciiInterned},
+    };
 
     use crate::v310::disassemble::disassemble_code;
 

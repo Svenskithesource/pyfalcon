@@ -2341,23 +2341,7 @@ checksum = "3eb8486b569e12e2c32ad3e204dbaba5e4b5b216e9367044f25f1dba42341773"
 [[package]]
 name = "pyc_editor"
 version = "0.2.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "390f171eba141a65e8f721d95b77842d8d8a089c2f41e30f82066d9de147add3"
-dependencies = [
- "bitflags 2.9.1",
- "hashable",
- "indexmap",
- "num-bigint",
- "num-complex",
- "ordered-float",
- "python_marshal",
- "store-interval-tree",
-]
-
-[[package]]
-name = "pyc_editor"
-version = "0.2.12"
-source = "git+https://github.com/Svenskithesource/pyc-editor#f5a18d812895acfcecb6af7297bc982b0a48f439"
+source = "git+https://github.com/Svenskithesource/pyc-editor#6f50d150ec47a3385b0f32f6e0ea92eb6f2653c2"
 dependencies = [
  "bitflags 2.9.1",
  "hashable",
@@ -2375,8 +2359,8 @@ name = "pyfalcon"
 version = "0.1.0"
 dependencies = [
  "clap",
- "pyc_editor 0.2.12 (git+https://github.com/Svenskithesource/pyc-editor)",
- "pyfalcon-core 0.1.0 (git+https://github.com/Svenskithesource/pyfalcon)",
+ "pyc_editor",
+ "pyfalcon-core",
  "python_marshal",
  "yansi",
 ]
@@ -2385,17 +2369,7 @@ dependencies = [
 name = "pyfalcon-core"
 version = "0.1.0"
 dependencies = [
- "pyc_editor 0.2.12 (git+https://github.com/Svenskithesource/pyc-editor)",
- "python_marshal",
- "yansi",
-]
-
-[[package]]
-name = "pyfalcon-core"
-version = "0.1.0"
-source = "git+https://github.com/Svenskithesource/pyfalcon#9f8e5595460876aedbe9a298ac30361801cc9cad"
-dependencies = [
- "pyc_editor 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pyc_editor",
  "python_marshal",
  "yansi",
 ]
@@ -2408,8 +2382,8 @@ dependencies = [
  "egui",
  "env_logger",
  "log",
- "pyc_editor 0.2.12 (git+https://github.com/Svenskithesource/pyc-editor)",
- "pyfalcon-core 0.1.0",
+ "pyc_editor",
+ "pyfalcon-core",
  "rfd",
  "wasm-bindgen-futures",
  "web-sys",
