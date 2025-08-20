@@ -2340,10 +2340,11 @@ checksum = "3eb8486b569e12e2c32ad3e204dbaba5e4b5b216e9367044f25f1dba42341773"
 
 [[package]]
 name = "pyc_editor"
-version = "0.3.0"
-source = "git+https://github.com/Svenskithesource/pyc-editor#65efd4de7340bc81d1f7cd543835d978be6a6f40"
+version = "0.3.1"
+source = "git+https://github.com/Svenskithesource/pyc-editor#136055122e1f4c19361fef75c7c39bab51d5a97f"
 dependencies = [
  "bitflags 2.9.1",
+ "displaydoc",
  "hashable",
  "indexmap",
  "num-bigint",
@@ -2391,9 +2392,9 @@ dependencies = [
 
 [[package]]
 name = "python_marshal"
-version = "0.4.5"
+version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6aa9fa8c3d93972faca95dfab8bcc1daeb5a5a2ee84820229f9f11712a1b134b"
+checksum = "be80575b9cfaab4f35e048e28f689eb7fec3e34714598af47f4e6ebe22b83eae"
 dependencies = [
  "bitflags 2.9.1",
  "bstr",
