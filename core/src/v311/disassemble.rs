@@ -380,6 +380,9 @@ fn disassemble_code_object(code_object: &Code) -> String {
         if matches!(instruction, Instruction::InvalidOpcode(_)) {
             // Show invalid instructions clearly
             text += &(fields.join(" ").on_bright_red().to_string());
+        } else if matches!(instruction, Instruction::Cache(_)) {
+            // Don't print cache instructions
+            continue;
         } else {
             text += &fields.join(" ");
         }
