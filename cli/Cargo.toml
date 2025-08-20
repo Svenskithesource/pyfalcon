@@ -1,6 +1,6 @@
 [package]
 name = "pyfalcon"
-version = "0.1.1"
+version = "0.1.2"
 license = "GPL-3.0-or-later"
 description = "A cross-version Python disassembler that supports both command-line and web"
 homepage = "https://pyfalcon.svenskithesource.be"
@@ -17,4 +17,4 @@ clap = { version = "4.5.43", features = ["cargo"] }
 pyc_editor = { workspace = true }
 python_marshal = { workspace = true }
 yansi = { workspace = true }
-core = { path = "../core", package = "pyfalcon-core", version = "0.1.1" }
+core = { path = "../core", package = "pyfalcon-core", version = "0.1.2" }

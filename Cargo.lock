@@ -2357,7 +2357,7 @@ dependencies = [
 
 [[package]]
 name = "pyfalcon"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "clap",
  "pyc_editor",
@@ -2368,7 +2368,7 @@ dependencies = [
 
 [[package]]
 name = "pyfalcon-core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "pyc_editor",
  "python_marshal",
@@ -2377,7 +2377,7 @@ dependencies = [
 
 [[package]]
 name = "pyfalcon-wasm"
-version = "0.1.0"
+version = "0.1.2"
 dependencies = [
  "eframe",
  "egui",
