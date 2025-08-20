@@ -40,4 +40,4 @@ cd wasm && trunk build --release
 
 ## Supported Python Versions
 
-Currently supports Python 3.10 and 3.11, with more versions planned for the future.
+Currently supports Python 3.10 3.11 and 3.12, with more versions planned for the future.
