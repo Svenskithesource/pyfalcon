@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use pyc_editor::prelude::*;
 use pyc_editor::v313::code_objects::JumpDirection;
 use pyc_editor::v313::instructions::get_real_jump_index;

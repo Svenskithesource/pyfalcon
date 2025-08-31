@@ -17,4 +17,4 @@ clap = { version = "4.5.43", features = ["cargo"] }
 pyc_editor = { workspace = true }
 python_marshal = { workspace = true }
 yansi = { workspace = true }
-core = { path = "../core", package = "pyfalcon-core" }
+core = { path = "../core", package = "pyfalcon-core", version = "0.1.4" }
