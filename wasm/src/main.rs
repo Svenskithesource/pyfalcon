@@ -124,6 +124,7 @@ impl eframe::App for PyFalcon {
                                 pyc_editor::PycFile::V310(_) => "3.10",
                                 pyc_editor::PycFile::V311(_) => "3.11",
                                 pyc_editor::PycFile::V312(_) => "3.12",
+                                pyc_editor::PycFile::V313(_) => "3.13",
                             };
                             ui.label("Python ".to_owned() + version);
                         }
@@ -149,6 +150,9 @@ impl eframe::App for PyFalcon {
                                 }
                                 pyc_editor::PycFile::V312(pyc_file) => {
                                     pyc_editor::CodeObject::V312(pyc_file.code_object.clone())
+                                }
+                                pyc_editor::PycFile::V313(pyc_file) => {
+                                    pyc_editor::CodeObject::V313(pyc_file.code_object.clone())
                                 }
                             };
                             let mut text = match &self.disassembled_text {

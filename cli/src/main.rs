@@ -62,6 +62,9 @@ fn main() {
             pyc_editor::PycFile::V312(pyc_file) => {
                 pyc_editor::CodeObject::V312(pyc_file.code_object)
             }
+            pyc_editor::PycFile::V313(pyc_file) => {
+                pyc_editor::CodeObject::V313(pyc_file.code_object)
+            }
         }),
     }
     .map_err(|e| {

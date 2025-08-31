@@ -3,6 +3,6 @@ members = ["cli", "wasm", "core"]
 resolver = "3"
 
 [workspace.dependencies]
-pyc_editor = { git = "https://github.com/Svenskithesource/pyc-editor", version = "0.3.1" }
-python_marshal = "0.4.6"
+pyc_editor = { git = "https://github.com/Svenskithesource/pyc-editor", version = "0.4.0" }
+python_marshal = "0.4.7"
 yansi = "1.0.1"
