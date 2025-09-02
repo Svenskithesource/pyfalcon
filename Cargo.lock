@@ -2340,8 +2340,8 @@ checksum = "3eb8486b569e12e2c32ad3e204dbaba5e4b5b216e9367044f25f1dba42341773"
 
 [[package]]
 name = "pyc_editor"
-version = "0.4.0"
-source = "git+https://github.com/Svenskithesource/pyc-editor#76ec2747961cf8ae5e334ec4633ac2618a7d12b4"
+version = "0.4.1"
+source = "git+https://github.com/Svenskithesource/pyc-editor#2fdcb787151689f01c672fe398068673e57b3892"
 dependencies = [
  "bitflags 2.9.3",
  "displaydoc",
