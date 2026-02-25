@@ -3,10 +3,18 @@ name = "pyfalcon-core"
 license = "GPL-3.0-or-later"
 description = "The core library for disassembling Python, used by pyfalcon"
 repository = "https://github.com/Svenskithesource/pyfalcon"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2024"
 
+[features]
+default = ["v310", "v311", "v312", "v313"]
+
+v310 = ["pyc_editor/v310"]
+v311 = ["pyc_editor/v311"]
+v312 = ["pyc_editor/v312"]
+v313 = ["pyc_editor/v313"]
+
 [dependencies]
-pyc_editor = { workspace = true }
+pyc_editor = { version = "0.4.3", default-features = false }
 python_marshal = { workspace = true }
 yansi = { workspace = true }

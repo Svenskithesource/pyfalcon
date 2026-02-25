@@ -2340,8 +2340,9 @@ checksum = "3eb8486b569e12e2c32ad3e204dbaba5e4b5b216e9367044f25f1dba42341773"
 
 [[package]]
 name = "pyc_editor"
-version = "0.4.1"
-source = "git+https://github.com/Svenskithesource/pyc-editor#2fdcb787151689f01c672fe398068673e57b3892"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "94881c2cba6246d33068188ac7da2f601098013fb476501afa888ab53c966772"
 dependencies = [
  "bitflags 2.9.3",
  "displaydoc",
@@ -2351,13 +2352,14 @@ dependencies = [
  "num-complex",
  "ordered-float",
  "paste",
+ "python-instruction-dsl-proc",
  "python_marshal",
  "store-interval-tree",
 ]
 
 [[package]]
 name = "pyfalcon"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "clap",
  "pyc_editor",
@@ -2368,7 +2370,7 @@ dependencies = [
 
 [[package]]
 name = "pyfalcon-core"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "pyc_editor",
  "python_marshal",
@@ -2377,7 +2379,7 @@ dependencies = [
 
 [[package]]
 name = "pyfalcon-wasm"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "eframe",
  "egui",
@@ -2388,6 +2390,18 @@ dependencies = [
  "rfd",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "python-instruction-dsl-proc"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d06958e132b21dd262fac1a1d8502883b01a191c6d0fecfd4cb4fba7402c1e35"
+dependencies = [
+ "heck",
+ "paste",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -2419,9 +2433,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.40"
+version = "1.0.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1885c039570dc00dcb4ff087a89e185fd56bae234ddc7f056a945bf36467248d"
+checksum = "21b2ebcf727b7760c461f091f9f0f539b77b8e87f2fd88131e7f1b433b3cece4"
 dependencies = [
  "proc-macro2",
 ]
@@ -2791,9 +2805,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.106"
+version = "2.0.117"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ede7c438028d4436d71104916910f5bb611972c5cfd7f89b8300a8186e6fada6"
+checksum = "e665b8803e7b1d2a727f4023456bbbbe74da67099c585258af0ad9c5013b9b99"
 dependencies = [
  "proc-macro2",
  "quote",

@@ -1,6 +1,6 @@
 [package]
 name = "pyfalcon"
-version = "0.1.4"
+version = "0.1.5"
 license = "GPL-3.0-or-later"
 description = "A cross-version Python disassembler that supports both command-line and web"
 homepage = "https://pyfalcon.svenskithesource.be"
@@ -12,9 +12,17 @@ edition = "2024"
 name = "pyfalcon"
 path = "src/main.rs"
 
+[features]
+default = ["v310", "v311", "v312", "v313"]
+
+v310 = ["core/v310", "pyc_editor/v310"]
+v311 = ["core/v311", "pyc_editor/v311"]
+v312 = ["core/v312", "pyc_editor/v312"]
+v313 = ["core/v313", "pyc_editor/v313"]
+
 [dependencies]
 clap = { version = "4.5.43", features = ["cargo"] }
-pyc_editor = { workspace = true }
+pyc_editor = { version = "0.4.3", default-features = false }
 python_marshal = { workspace = true }
 yansi = { workspace = true }
-core = { path = "../core", package = "pyfalcon-core", version = "0.1.4" }
+core = { path = "../core", package = "pyfalcon-core", version = "0.1.4"}
